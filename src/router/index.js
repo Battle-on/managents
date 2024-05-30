@@ -31,7 +31,6 @@ export const constantRoutes = [
     }]
   },
 
-
   {
     path: "/setting",
     component: Layout,
@@ -52,6 +51,29 @@ export const constantRoutes = [
             component: () => import("@/views/setting/page"),
             meta: { title: "系统管理", icon: "el-icon-s-cooperation" },
           },
+    ],
+  },
+
+  {
+    path: "/content",
+    component: Layout,
+    redirect: '/content/index',
+    meta: {
+      title: "内容管理",
+      icon: "el-icon-s-promotion",
+    },
+    children: [
+        {
+            path: "index",
+            component: () => import("@/views/content/article"),
+            meta: { title: "文章管理", icon: "el-icon-reading" },
+        },
+        {
+            path: "article-edit",
+            component: () => import("@/views/content/article/edit"),
+            hidden: true,
+            meta: { title: "文章编辑" },
+        },
     ],
   },
 

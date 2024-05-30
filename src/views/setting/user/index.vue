@@ -82,7 +82,7 @@
 
 
 <script>
-import request from '@/utils/request'
+import fetchSmart from '@/utils/fetch'
 
 export default {
     data() {
@@ -140,19 +140,15 @@ export default {
             this.fetchUsers();
 
         },
-        fetchUsers() {
-            request({
-                url: '/api/user/list',
-                method: 'get',
-                params: {
-                    pageNum: this.pageNum,
-                    pageSize: this.pageSize,
-                    username: this.searchKey
-                }
-            }).then((response) => {
-                this.users = response.data.sorts;
-                this.total = response.data.total;
-            });
+        async fetchUsers() {
+            const params = {
+                pageNum: this.pageNum,
+                pageSize: this.pageSize,
+                username: this.searchKey
+            }
+            const { data } = await fetchSmart('/api/user/list', params, 'get')
+            this.users = data.sorts;
+            this.total = data.total;
 
         },
         refesh() {
@@ -163,30 +159,22 @@ export default {
         },
 
         submitForm() {
-            this.$refs["form"].validate((valid) => {
+            this.$refs["form"].validate(async (valid) => {
                 if (valid) {
                     const loading = this.$loading()
-                    request({
-                        url: '/api/user/create',
-                        method: 'post',
-                        data: this.formData
-                    }).then((res) => {
-                        if (res.code === 0) {
+                    const { code } = await fetchSmart('/api/user/create', this.formData)
+                    if (code === 0) {
+                        this.$message.success("添加用户成功")
+                        this.$nextTick(() => {
+                            this.cancel()
+                        })
+                    } else {
+                        this.$message.error(res.msg)
+                    }
+                    loading.close()
 
-                            this.$message.success("添加用户成功")
-                            this.$nextTick(() => {
-                                this.cancel()
-                            })
-                        } else {
-                            this.$message.error(res.msg)
-                        }
-
-                    }).finally(() => {
-                        loading.close()
-                    });
                 } else {
                     console.log("valid")
-                    // this.$message.success("添加用户成功")
                 }
             });
         },
@@ -200,27 +188,21 @@ export default {
         },
 
         deleteUser(row) {
-
+            const params = {
+                id: row.id
+            }
             this.$confirm("确定要删除此用户嘛？", '', {
                 distinguishCancelAndClose: true,
                 confirmButtonText: '确认',
                 cancelButtonText: '取消'
-            }).then(() => {
-                request({
-                    url: '/api/user/delete',
-                    method: 'post',
-                    data: {
-                        id: row.id
-                    }
-                }).then((res) => {
-                    if (res.code === 0) {
-                        this.$message.success("删除用户成功")
-                    } else {
-                        this.$message.error(res.msg)
-                    }
-                }).finally(() => {
-                    this.refesh()
-                });
+            }).then(async () => {
+                const { code, msg } = await fetchSmart('/api/user/delete', params)
+                if (code === 0) {
+                    this.$message.success("删除用户成功")
+                } else {
+                    this.$message.error(msg)
+                }
+                this.refesh()
             })
 
         },
@@ -245,24 +227,23 @@ export default {
                 callback();
             }
         },
-        upatePassword() {
-            request({
-                url: '/api/user/updatePassword',
-                method: 'post',
-                data: {
-                    id: this.passwordModel.id,
-                    password: this.passwordModel.newPassword
-                }
-            }).then((res) => {
-                if (res.code === 0) {
-                    this.$message.success("密码更改成功")
-                    this.closePasswordDialog();
-                } else {
-                    this.$message.error(res.msg)
-                }
-            }).finally(() => {
-                this.refesh()
-            });
+        async upatePassword() {
+
+            const params = {
+                id: this.passwordModel.id,
+                password: this.passwordModel.newPassword
+            }
+
+            const { code } = await fetchSmart('/api/user/updatePassword', params)
+            if (code === 0) {
+                this.$message.success("密码更改成功")
+                this.closePasswordDialog();
+            } else {
+                this.$message.error(res.msg)
+            }
+            this.refesh()
+
+
         },
 
         handlePageChange(pageNum) {
