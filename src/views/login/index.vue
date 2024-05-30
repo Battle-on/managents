@@ -82,7 +82,7 @@ export default {
     return {
       loginForm: {
         username: '15216153264',
-        password: '12345678',
+        password: '12345678'
 
       },
       loginRules: {
@@ -125,7 +125,7 @@ export default {
           })
         } else {
           console.log('error submit!!')
-          return false
+        //   return false
         }
       })
     }

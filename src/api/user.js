@@ -8,7 +8,6 @@ export function login(data) {
   })
 }
 
-
 export function logout() {
   return request({
     url: '/api/user/logout',
